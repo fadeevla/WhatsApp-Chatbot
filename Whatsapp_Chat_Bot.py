@@ -7,6 +7,69 @@ import os
 import time
 import math
 
+class WhatsAppWebClient:
+    def __init__(self, chatname=None):
+        if os.name == "nt":
+            driverPath = "driver/chromedriver_2.24.exe"
+            dataPath = "Data"
+        else:
+            driverPath = "driver/chromedriver"
+            dataPath = "Data/ChatBot"
+        self.chatname=chatname
+        options = webdriver.ChromeOptions()
+        options.add_argument("--user-data-dir=" + dataPath)
+        self.driver = webdriver.Chrome(chrome_options=options, executable_path=driverPath)
+        self.driver.get('https://web.whatsapp.com')
+        time.sleep(15)
+        print('Now you can select appropriate chat')
+        self.chatsList = self.get_chats()
+                
+        if isinstance(chatname, str):
+            self.activate_chat(self.chatname)
+    def get_chats(self, attempts=3):
+        chats = None
+        for i in range(attempts):
+            try:
+                chatsRoot = self.driver.find_element_by_xpath('//*[@id="pane-side"]/div[1]/div/div')
+                return chatsRoot.find_elements_by_class_name('X7YrQ')
+            except:
+                time.sleep(5)
+        return None
+
+    def activate_chat(self, name):
+        """
+        activate (by sending click) to the chat containing name:str
+        """
+        for chat in self.chatsList:
+            if name in chat.text:
+                chat.click()
+                return 0
+        return 1, 'chat name not found, ensure exact case match'
+    def send_message(self, message):
+        assert is_instance(message, str), 'Message must be string'
+        message_h = self.driver.find_elements_by_xpath('//*[@id="main"]/footer/div[1]/div[2]/div/div[2]')[0]
+        message_h.send_keys(message)
+        message_h.send_keys(Keys.ENTER)
+    def read_messages(self):
+        messages = None
+        messageRoot = self.driver.find_element_by_xpath('//*[@id="main"]/div[3]/div/div')
+        messageList = messageRoot.find_elements_by_class_name('FTBzM')
+        
+        return [message for message in [m.text for m in messageList]]
+
+cl=WhatsAppWebClient(chatname='NGT team chat')
+print(cl.read_messages())
+print(cl.chatsList)
+print(cl.activate_chat('NGT team chat'))
+
+options = webdriver.ChromeOptions()
+options.add_argument("--user-data-dir=" + dataPath)
+driver = webdriver.Chrome(chrome_options=options, executable_path=driverPath)
+driver.get('https://web.whatsapp.com')
+
+#open tab
+driver.execute_script("window.open('','_blank');")
+#driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't') 
 
 class Message():
     def __init__(self, user, message):
@@ -29,9 +92,14 @@ options = webdriver.ChromeOptions()
 options.add_argument("--user-data-dir=" + dataPath)
 driver = webdriver.Chrome(chrome_options=options, executable_path=driverPath)
 driver.get('https://web.whatsapp.com')
+
+#open tab
 driver.execute_script("window.open('','_blank');")
+#driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't') 
 driver.switch_to_window(driver.window_handles[1])
-driver.get('http://www.square-bear.co.uk/mitsuku/nfchat.htm')
+#driver.get('http://www.square-bear.co.uk/mitsuku/nfchat.htm')
+driver.get('http://www.mars.com')
+import time;time.sleep(25)
 driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + Keys.TAB)
 
 input("Choose a chat on whatsapp and press enter : ")
