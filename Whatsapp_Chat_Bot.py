@@ -45,8 +45,13 @@ class WhatsAppWebClient:
                 chat.click()
                 return 0
         return 1, 'chat name not found, ensure exact case match'
-    def send_message(self, message):
+    def send_message(self, message, chatname=None):
+        
         assert is_instance(message, str), 'Message must be string'
+
+        if chatname is not None:
+            self.activate_chat(chatname)
+            time.sleep(2)
         message_h = self.driver.find_elements_by_xpath('//*[@id="main"]/footer/div[1]/div[2]/div/div[2]')[0]
         message_h.send_keys(message)
         message_h.send_keys(Keys.ENTER)
@@ -58,9 +63,10 @@ class WhatsAppWebClient:
         return [message for message in [m.text for m in messageList]]
 
 cl=WhatsAppWebClient(chatname='NGT team chat')
-print(cl.read_messages())
+
 print(cl.chatsList)
 print(cl.activate_chat('NGT team chat'))
+print(cl.read_messages()[-1])
 
 options = webdriver.ChromeOptions()
 options.add_argument("--user-data-dir=" + dataPath)
